@@ -1,7 +1,7 @@
 {
   "name": "selfbot",
   "version": "1.0.0",
-  "description": "ppp",
+  "description": "PEBRI",
   "main": "main.js",
   "directories": {
     "lib": "lib"
@@ -41,5 +41,18 @@
   "scripts": {
     "start": "node main",
     "test": "supervisor main"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/febzofc"
+  },
+  "keywords": [
+    "Wasu"
+  ],
+  "author": "PEBRI",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/febzofc"
+  },
+  "homepage": "https://github.com/febzofc"
 }
