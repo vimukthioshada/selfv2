@@ -611,7 +611,7 @@ ${yut.all[0].url}
 •🔗 Link Channel : ${yut.all[0].author.url}`      
         ya = await getBuffer(thumb)
         py =await pebz.prepareMessage(from, ya, image)
-        gbutsan = [{buttonId: `#buttonmusic ${yut.all[0].url}`, buttonText: {displayText: '🎵AUDIO'}, type: 1},{buttonId: `#buttonvideo ${yut.all[0].url}`, buttonText: {displayText: '🎥VIDEO'}, type: 1}]
+        gbutsan = [{buttonId: `${prefix}ytmp3 ${yut.all[0].url}`, buttonText: {displayText: '🎵AUDIO'}, type: 1},{buttonId: `${prefix}ytmp4 ${yut.all[0].url}`, buttonText: {displayText: '🎥VIDEO'}, type: 1}]
         gbuttonan = {
         imageMessage: py.message.imageMessage,
         contentText: capti,
@@ -621,13 +621,13 @@ ${yut.all[0].url}
 }
         await pebz.sendMessage(from, gbuttonan, MessageType.buttonsMessage)})
         break                
-        case 'buttonmusic':
+        case 'ytmp3':
         if(!q) return reply('linknya?')              
         res = await yta(`${q}`).catch(e => {
         reply('```[ ! ] Error Saat Mengirim Audio```')})
         sendMedia(from, `${res.dl_link}`,{quoted:mek})
         break         
-        case 'buttonvideo':
+        case 'ytmp4':
         if(!q) return reply('linknya?')            
         res = await ytv(`${q}`).catch(e => {
         reply('```[ ! ] Error Saat Mengirim Video```')})
@@ -905,7 +905,7 @@ ${yut.all[0].url}
             reply(`Kirim gambar dengan caption ${prefix}sethumb`)
           	}
 			break	
-	case 'ytmp4':
+	case 'ytmp42':
 			if (args.length === 0) return reply(`Kirim perintah *${prefix}ytmp4 [linkYt]*`)
 			let isLinks2 = args[0].match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)
 			if (!isLinks2) return reply(mess.error.Iv)
@@ -926,7 +926,7 @@ ${yut.all[0].url}
 			    reply(mess.error.api)
 				}
 				break
-	case 'ytmp3':
+	case 'ytmp32':
 			if (args.length === 0) return reply(`Kirim perintah *${prefix}ytmp3 [linkYt]*`)
 			let isLinks = args[0].match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)
 			if (!isLinks) return reply(mess.error.Iv)
@@ -967,7 +967,7 @@ ${yut.all[0].url}
     		const { wm, nowm, audio } = result
     		axios.get(`https://tinyurl.com/api-create.php?url=${nowm}`)
     		.then(async (a) => {
-    		me = `*Link* : ${a.data}`
+    		me = `*Lain Kali Jangan Begitu Ya!! Watermark Men!*`
 		pebz.sendMessage(from,{url:`${nowm}`},video,{mimetype:'video/mp4',quoted:mek,caption:me})
 		})
 		})
