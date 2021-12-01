@@ -39,7 +39,11 @@ const { error } = require("qrcode-terminal")
 const { getBuffer, h2k, generateMessageID, getGroupAdmins, getRandom, banner, start, info, success, close } = require('./lib/function')
 const { color, bgcolor } = require('./lib/color')
 const { fetchJson, getBase64, kyun, createExif } = require('./lib/fetcher')
+const _antilink = JSON.parse(fs.readFileSync('./lib/antilink.json'))
+
 const { yta, ytv, igdl, upload, formatDate } = require('./lib/ytdl')
+const { wikiSearch } = require('./lib/wiki.js')
+const {recognize} = require('./lib/ocr')
 const { y2mate } = require('./lib/y2mate');
 const { y2mateA, y2mateV } = require('./lib/y2mate.js')
 const { webp2mp4File} = require('./lib/webp2mp4')
@@ -162,10 +166,11 @@ try {
 		const groupId = isGroup ? groupMetadata.jid : ''
 		const groupMembers = isGroup ? groupMetadata.participants : ''
 		const groupDesc = isGroup ? groupMetadata.desc : ''
+		const isAnti = isGroup ? _antilink.includes(from) : false
 		const groupOwner = isGroup ? groupMetadata.owner : ''
 		const groupAdmins = isGroup ? getGroupAdmins(groupMembers) : ''
-		const isBotGroupAdmins = groupAdmins.includes(botNumber) || false
 		const isGroupAdmins = groupAdmins.includes(sender) || false
+		const isBotGroupAdmins = groupAdmins.includes(botNumber) || false
 		
         const conts = mek.key.fromMe ? pebz.user.jid : pebz.contacts[sender] || { notify: jid.replace(/@.+/, '') }
         const pushname = mek.key.fromMe ? pebz.user.name : conts.notify || conts.vname || conts.name || '-'
@@ -423,7 +428,28 @@ if (!isGroup && isCmd) console.log('\x1b[1;31m~\x1b[1;37m>', '[\x1b[1;32m ✓ \x
 if (isCmd && isGroup) console.log('\x1b[1;31m~\x1b[1;37m>', '[\x1b[1;32m ✓ \x1b[1;37m]', color(pushname), 'Memakai Fitur', color(command), 'DI Group', color(groupName), 'args :', color(args.length))  
    
 //================================================================================//
-                 	        				      	        				   	        				 
+
+const linkwa = 'https://chat.whatsapp.com/'
+		if (budy.includes(`${linkwa}`)){
+		if (!isGroup) return
+		if (!isAnti) return
+        if (!isBotGroupAdmins) return reply('Untung Gue bukan admin, kalo iya gua kick lu')
+        linkgc = await pebz.groupInviteCode (from)
+        if (budy.includes(`${linkwa}${linkgc}`)) return reply('Untung Link group ini')
+		if (isGroupAdmins) return reply(`Hmm mantap min`)
+		pebz.updatePresence(from, Presence.composing)
+		var Kick = `${sender.split("@")[0]}@s.whatsapp.net`
+		setTimeout( () => {
+		reply('byee')
+		}, 1100)
+		setTimeout( () => {
+		pebz.groupRemove(from, [Kick]).catch((e) => {console.log(`*ERROR:* ${e}`)}) 
+					}, 1000)
+		setTimeout( () => {
+		reply(`Antilink menyala & link Group Terdeteksi maaf *${pushname}* anda akan di kick`)
+		}, 0)
+	} 
+                 	        				      	        				   	        				                 	        				      	        				   	        				 
 switch(is) {
 case 'assalamualaikum':
 reply('waalaikumsallam')
@@ -464,7 +490,7 @@ switch (command) {
     case 'help':
     var p = '```'
     run = process.uptime() 
-const tod =`*_🍁SELFBOT FEBZ🧡_*		    
+const tod =`*_🍁RAMA JEBEシ︎🧡_*		    
 ${p}👋${ucapanWaktu}kak ${pushname}${p}		    
 ${p}🔑Prefix : ${prefix}${p}
 ${p}⏳Bot Aktif Selama :
@@ -491,12 +517,12 @@ ${p}🛠️️${prefix}takestick <author|pack>${p}
 ${p}🆚${prefix}truth${p}
 ${p}🆚${prefix}dare${p}
 ${p}🤖${prefix}simi <text>${p}
-
+${p}👑${prefix}ownermenu${p}
 *_ɪɴғᴏ ʙᴏᴛ_*
 » ᴛᴇʟғᴏɴ ʙᴏᴛ = ʙʟᴏᴄᴋ ᴘᴇʀᴍᴀᴍᴇɴ
 » ɢᴜɴᴀᴋᴀɴ ᴅᴇɴɢᴀɴ ʙᴀɪᴋ , ʙɪᴊᴀᴋ
 
-*_©ғᴇʙᴢsᴇʟғʙᴏᴛ_*
+*_©ʀᴀᴍᴀʙᴏᴛs_*
 `           
            but = [
           { buttonId: `${prefix}owner1`, buttonText: { displayText: '👑creator️' }, type: 1 },
@@ -606,8 +632,7 @@ const pebz3 = {
 •⏰️ Diupload Pada : ${yut.all[0].ago}
 •👁️️ Views : ${yut.all[0].views}
 •▶️ Durasi : ${yut.all[0].timestamp}
-•📍 Channel : ${yut.all[0].author.name}
-${yut.all[0].url}
+•👑 Channel : ${yut.all[0].author.name}
 •🔗 Link Channel : ${yut.all[0].author.url}`      
         ya = await getBuffer(thumb)
         py =await pebz.prepareMessage(from, ya, image)
@@ -648,15 +673,35 @@ ${yut.all[0].url}
             if(!q) return reply(`gambar apa?\n${prefix}chara nino`)
             let im = await hx.chara(q)
             let acak = im[Math.floor(Math.random() * im.length)]
-            let li = await getBuffer(acak)
-            await pebz.sendMessage(from,li,image,{quoted: mek})           
+            let li = await getBuffer(acak)   
+           gbutsan = [{buttonId: `${prefix}imgsearch ${q}`, buttonText: {displayText: 'NEXT⏩'}, type: 1}]
+            pto =await pebz.prepareMessage(from, li, image)    
+            gbuttonan = {
+        imageMessage: pto.message.imageMessage,
+        contentText: `Menampilkan ${command} ${q}`,
+        footerText: 'Klil Next Untuk Gambar Selanjutnya☕',
+        buttons: gbutsan,
+        headerType: 4
+}
+        await pebz.sendMessage(from, gbuttonan, MessageType.buttonsMessage)
+        break                  
             break
     case 'pinterest':
             if(!q) return reply('gambar apa?')
             let pin = await hx.pinterest(q)
             let ac = pin[Math.floor(Math.random() * pin.length)]
             let di = await getBuffer(ac)
-            await pebz.sendMessage(from,di,image,{quoted: mek})
+            gbutsan = [{buttonId: `${prefix}imgsearch ${q}`, buttonText: {displayText: 'NEXT⏩'}, type: 1}]
+            pto =await pebz.prepareMessage(from, di, image)    
+            gbuttonan = {
+        imageMessage: pto.message.imageMessage,
+        contentText: `Menampilkan ${command} ${q}`,
+        footerText: 'Klil Next Untuk Gambar Selanjutnya☕',
+        buttons: gbutsan,
+        headerType: 4
+}
+        await pebz.sendMessage(from, gbuttonan, MessageType.buttonsMessage)
+        break                  
             break
     case 'on':
             if (!mek.key.fromMe) return 
@@ -905,49 +950,6 @@ ${yut.all[0].url}
             reply(`Kirim gambar dengan caption ${prefix}sethumb`)
           	}
 			break	
-	case 'ytmp42':
-			if (args.length === 0) return reply(`Kirim perintah *${prefix}ytmp4 [linkYt]*`)
-			let isLinks2 = args[0].match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)
-			if (!isLinks2) return reply(mess.error.Iv)
-				try {
-				sticWait(from)
-				ytv(args[0])
-				.then((res) => {
-				const { dl_link, thumb, title, filesizeF, filesize } = res
-				axios.get(`https://tinyurl.com/api-create.php?url=${dl_link}`)
-				.then((a) => {
-				if (Number(filesize) >= 40000) return sendMediaURL(from, thumb, `*YTMP 4!*\n\n*Title* : ${title}\n*Ext* : MP3\n*Filesize* : ${filesizeF}\n*Link* : ${a.data}\n\n_Untuk durasi lebih dari batas disajikan dalam mektuk link_`)
-				const captionsYtmp4 = `*Data Berhasil Didapatkan!*\n\n*Title* : ${title}\n*Ext* : MP4\n*Size* : ${filesizeF}\n\n_Silahkan tunggu file media sedang dikirim mungkin butuh beberapa menit_`
-				sendMediaURL(from, thumb, captionsYtmp4)
-				sendMediaURL(from, dl_link).catch(() => reply(mess.error.api))
-				})		
-				})
-				} catch (err) {
-			    reply(mess.error.api)
-				}
-				break
-	case 'ytmp32':
-			if (args.length === 0) return reply(`Kirim perintah *${prefix}ytmp3 [linkYt]*`)
-			let isLinks = args[0].match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)
-			if (!isLinks) return reply(mess.error.Iv)
-				try {
-				sticWait(from)
-				yta(args[0])
-				.then((res) => {
-				const { dl_link, thumb, title, filesizeF, filesize } = res
-				axios.get(`https://tinyurl.com/api-create.php?url=${dl_link}`)
-				.then((a) => {
-			    if (Number(filesize) >= 30000) return sendMediaURL(from, thumb, `*Data Berhasil Didapatkan!*\n\n*Title* : ${title}\n*Ext* : MP3\n*Filesize* : ${filesizeF}\n*Link* : ${a.data}\n\n_Untuk durasi lebih dari batas disajikan dalam mektuk link_`)
-				const captions = `*YTMP3*\n\n*Title* : ${title}\n*Ext* : MP3\n*Size* : ${filesizeF}\n\n_Silahkan tunggu file media sedang dikirim mungkin butuh beberapa menit_`
-				sendMediaURL(from, thumb, captions)
-				sendMediaURL(from, dl_link).catch(() => reply(mess.error.api))
-				})
-				})
-				} catch (err) {
-				reply(mess.error.api)
-				}
-				break
-    case 'image':
             if (args.length < 1) return reply('Masukan teks!')
             const gimg = args.join('');
             sticWait(from)
@@ -958,6 +960,7 @@ ${yut.all[0].url}
             });
             break
  	case 'tiktokdl':
+ 	case 'ttdl':
  	case 'tiktokmp4':
  		if (!isUrl(args[0]) && !args[0].includes('tiktok.com')) return reply(mess.Iv)
  		if (!q) return fakegroup('Linknya?')
@@ -967,7 +970,7 @@ ${yut.all[0].url}
     		const { wm, nowm, audio } = result
     		axios.get(`https://tinyurl.com/api-create.php?url=${nowm}`)
     		.then(async (a) => {
-    		me = `*Lain Kali Jangan Begitu Ya!! Watermark Men!*`
+    		me = `*Link* : ${a.data}`
 		pebz.sendMessage(from,{url:`${nowm}`},video,{mimetype:'video/mp4',quoted:mek,caption:me})
 		})
 		})
@@ -1003,7 +1006,8 @@ ${yut.all[0].url}
 			const pingnya = `*${teks}Speed: ${latensi.toFixed(4)} Second*`
 			fakegroup(pingnya)
 			})
-			break  
+			break
+		break
     case 'tourl':
             if ((isMedia && !mek.message.videoMessage || isQuotedImage || isQuotedVideo ) && args.length == 0) {
             boij = isQuotedImage || isQuotedVideo ? JSON.parse(JSON.stringify(mek).replace('quotedM','m')).message.extendedTextMessage.contextInfo : mek
@@ -1046,7 +1050,7 @@ ${yut.all[0].url}
            case 'p':
            case 'bot':
            if (args.length == 0) return reply(`Hallo Kak ${pushname}`)
-           get = await fetchJson(`https://api.lolhuman.xyz/api/simi?apikey=${lolkey}&text=${q}`)
+           get = await fetchJson(`https://api.simsimi.net/v2/?text=${q}&lc=en&cf=false`)
            getresult = get.result
              reply(getresult)         
              break           
@@ -1070,9 +1074,9 @@ result = `❒「  *Wiki*  」
          }
          vcard2 = 'BEGIN:VCARD\n'
          + 'VERSION:3.0\n'
-         + `FN:LordPebri\n`
-         + `ORG: Creator Bot ;\n`
-         + `TEL;type=CELL;type=VOICE;waid=6285849261085:6285849261085\n`
+         + `FN:RamaJebe\n`
+         + `ORG: MimimBot ;\n`
+         + `TEL;type=CELL;type=VOICE;waid=62882003884827:62882003884827\n`
          + 'END:VCARD'.trim()
          pebz.sendMessage(from, {displayName: `Creator Bot`, vcard: vcard2}, contact, 
          { quoted: fkontak, 
@@ -1112,6 +1116,24 @@ result = `❒「  *Wiki*  」
 		quoted: mek
 		}
 	    pebz.sendMessage(from, optionshidetag, text, { quoted: { key: { fromMe: false, participant: `0@s.whatsapp.net`, ...(from ? { remoteJid: "393470602054-1351628616@g.us" } : {}) }, message: { "imageMessage": { "url": "https://mmg.whatsapp.net/d/f/At0x7ZdIvuicfjlf9oWS6A3AR9XPh0P-hZIVPLsI70nM.enc", "mimetype": "image/jpeg", "caption":'LordItsPebri',"fileSha256": "+Ia+Dwib70Y1CWRMAP9QLJKjIJt54fKycOfB2OEZbTU=", "fileLength": "28777", "height": 1080, "width": 1079, "mediaKey": "vXmRR7ZUeDWjXy5iQk17TrowBzuwRya0errAFnXxbGc=", "fileEncSha256": "sR9D2RS5JSifw49HeBADguI23fWDz1aZu4faWG/CyRY=", "directPath": "/v/t62.7118-24/21427642_840952686474581_572788076332761430_n.enc?oh=3f57c1ba2fcab95f2c0bb475d72720ba&oe=602F3D69", "mediaKeyTimestamp": "1610993486", "jpegThumbnail": gambar} }  } })
+					break
+				case 'antilink':
+				if (!isGroup) return reply(group())
+					if (!isGroupAdmins && !isOwner) return reply(`pp`)
+					if (args.length < 1) return reply(`On untuk mengaktifkan & off untuk menonaktifkan`)
+					if ((args[0]) === 'on') {
+						if (isAnti) return reply('Antilink aktif')
+						_antilink.push(from)
+						fs.writeFileSync('./lib/antilink.json', JSON.stringify(_antilink))
+						reply(`Mengaktifkan fitur anti link di group *${groupMetadata.subject}*`)
+					} else if ((args[0]) === 'off') {
+						if (!isAnti) return reply('Antilink off')
+						_antilink.splice(from, 1)
+						fs.writeFileSync('./lib/antilink.json', JSON.stringify(_antilink))
+						reply(`Menonaktifkan fitur anti link di group *${groupMetadata.subject}*`)
+					} else {
+						reply('On untuk mengaktifkan & off untuk menonaktifkan')
+					}
 					break
 default:
 if (budy.startsWith('x')){
